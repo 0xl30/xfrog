@@ -13,6 +13,9 @@
 - **Result Merging and Deduplication**: Ensures unique subdomains with a clean final output.
 
 ---
+![Preview of XFORG Subdomains Enumeration Script](preview.png)
+
+---
 
 ## 🚀 Installation
 

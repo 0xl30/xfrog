@@ -1,22 +1,23 @@
-# /modules/virustotal.py
 import requests
+from utils import safe_get_json
 
 def virustotal_subdomain_module(domain, api_key):
-    """
-    Fetch subdomains for the given domain using VirusTotal's API.
-    """
+    if not api_key:
+        raise Exception("Missing VirusTotal API key")
+
     url = f"https://www.virustotal.com/api/v3/domains/{domain}/subdomains"
     headers = {
-        "x-apikey": api_key,  # Some older documentation uses "Authorization: Bearer <api_key>", but x-apikey is correct for current usage
+        "x-apikey": api_key
     }
-    
+
     try:
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()  # Raise an error for bad status codes
-        return [entry['id'] for entry in response.json().get("data", [])]
-    except requests.exceptions.HTTPError as e:
-        print(f"[!] VirusTotal API request failed: {e}")
-        return []
+        response = requests.get(url, headers=headers, timeout=10)
+        data = safe_get_json(response, "VirusTotal")
+        if not data:
+            return []
+
+        return [d.get("id", "").replace("*.", "") for d in data.get("data", []) if d.get("id", "").endswith(domain)]
+
     except requests.exceptions.RequestException as e:
-        print(f"[!] Network error occurred: {e}")
+        print(f"[!] VirusTotal network error: {e}")
         return []
